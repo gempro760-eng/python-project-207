@@ -75,7 +75,7 @@ def test_invalid_url_shows_required_message(client):
     response = client.post("/urls", data={"url": "not-a-url"})
 
     assert response.status_code == 422
-    assert b"URL no v\xc3\xa1lida" in response.data
+    assert b"URL no v\xc3\xa1lido" in response.data
 
 
 def test_add_url_returns_success_flash(client, monkeypatch):
@@ -84,7 +84,7 @@ def test_add_url_returns_success_flash(client, monkeypatch):
     response = client.post("/urls", data={"url": "https://example.com"}, follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"P\xc3\xa1gina agregada con \xc3\xa9xito" in response.data
+    assert b"La p\xc3\xa1gina se agreg\xc3\xb3 correctamente" in response.data
 
 
 def test_check_url_returns_required_success_flash(client, monkeypatch):
@@ -102,7 +102,7 @@ def test_check_url_returns_required_success_flash(client, monkeypatch):
     response = client.post("/urls/42/checks", follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"P\xc3\xa1gina verificada con \xc3\xa9xito" in response.data
+    assert b"La p\xc3\xa1gina fue verificada correctamente" in response.data
 
 
 def test_check_url_returns_error_flash_on_request_exception(client, monkeypatch):
@@ -116,4 +116,4 @@ def test_check_url_returns_error_flash_on_request_exception(client, monkeypatch)
     response = client.post("/urls/42/checks", follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"Ocurri\xc3\xb3 un error al hacer la verificaci\xc3\xb3n" in response.data
+    assert b"Ocurri\xc3\xb3 un error durante la verificaci\xc3\xb3n" in response.data

@@ -19,6 +19,13 @@
       {% endwith %}
     </header>
 
+    <nav class="navbar navbar-light bg-light mb-4">
+      <div class="container">
+        <a class="navbar-brand" href="/">Analizador de páginas</a>
+        <a class="nav-link" href="/urls">Sitios</a>
+      </div>
+    </nav>
+
     <main class="container mt-5">
       <h1>Sitio web: {{ url.name }}</h1>
       <table class="table table-bordered table-hover mt-3" data-test="url">
@@ -32,7 +39,7 @@
       <!-- Botón para ejecutar revisión -->
       <h2 class="mt-5 mb-3">Revisiones</h2>
       <form method="post" action="/urls/{{ url.id }}/checks" class="mb-3">
-        <button type="submit" class="btn btn-primary">Ejecutar revisión</button>
+        <button type="submit" class="btn btn-primary">Iniciar verificación</button>
       </form>
 
       <!-- Tabla de revisiones -->

@@ -20,6 +20,13 @@
       {% endwith %}
     </header>
 
+    <nav class="navbar navbar-light bg-light mb-4">
+      <div class="container">
+        <a class="navbar-brand" href="/">Analizador de páginas</a>
+        <a class="nav-link" href="/urls">Sitios</a>
+      </div>
+    </nav>
+
     <main class="container mt-5">
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 text-center">
@@ -28,8 +35,8 @@
           
           <form action="/urls" method="post" class="d-flex justify-content-center">
             <div class="input-group input-group-lg mb-3">
-              <input type="text" name="url" class="form-control" placeholder="https://www.ejemplo.com" required>
-              <button class="btn btn-primary" type="submit">Analizar</button>
+              <input type="text" name="url" class="form-control" placeholder="https://www.example.com" required>
+              <button class="btn btn-primary" type="submit">Verificar</button>
             </div>
           </form>
 

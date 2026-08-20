@@ -26,6 +26,15 @@ def get_text_content(node):
     return node.get_text(' ', strip=True) or ''
 
 
+def truncate_text(value, max_length=200):
+    if value is None:
+        return ''
+    text = str(value).strip()
+    if len(text) <= max_length:
+        return text
+    return f"{text[: max_length - 3].rstrip()}..."
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -36,7 +45,7 @@ def post_url():
     url_input = request.form.get('url', '')
 
     if not validators.url(url_input) or len(url_input) > 255:
-        flash('URL no válida', 'danger')
+        flash('URL no válido', 'danger')
         return render_template('index.html'), 422
 
     parsed = urlparse(url_input)
@@ -59,7 +68,7 @@ def post_url():
             )
             url_id = cur.fetchone()[0]
             conn.commit()
-            flash('Página agregada con éxito', 'success')
+            flash('La página se agregó correctamente', 'success')
 
     except Exception:
         conn.rollback()
@@ -77,10 +86,19 @@ def get_urls():
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT urls.id, urls.name, urls.created_at, MAX(url_checks.created_at) as last_check
+        SELECT urls.id,
+               urls.name,
+               urls.created_at,
+               last_check.created_at AS last_check,
+               last_check.status_code AS last_status_code
         FROM urls
-        LEFT JOIN url_checks ON urls.id = url_checks.url_id
-        GROUP BY urls.id
+        LEFT JOIN LATERAL (
+            SELECT created_at, status_code
+            FROM url_checks
+            WHERE url_id = urls.id
+            ORDER BY created_at DESC
+            LIMIT 1
+        ) AS last_check ON true
         ORDER BY urls.id DESC
     """)
     urls_data = cur.fetchall()
@@ -88,7 +106,13 @@ def get_urls():
     conn.close()
 
     urls_list = [
-        {'id': row[0], 'name': row[1], 'created_at': row[2], 'last_check': row[3]} 
+        {
+            'id': row[0],
+            'name': row[1],
+            'created_at': row[2],
+            'last_check': row[3],
+            'status_code': row[4]
+        }
         for row in urls_data
     ]
     return render_template('urls.html', urls=urls_list)
@@ -150,14 +174,14 @@ def check_url(id):
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        title = get_text_content(soup.find('title'))
-        h1 = get_text_content(soup.find('h1'))
+        title = truncate_text(get_text_content(soup.find('title')))
+        h1 = truncate_text(get_text_content(soup.find('h1')))
 
         meta_desc = soup.find(
             'meta',
             attrs={'name': re.compile(r'description', re.IGNORECASE)}
         )
-        description = meta_desc.get('content', '').strip() if meta_desc else ''
+        description = truncate_text(meta_desc.get('content', '').strip()) if meta_desc else ''
 
         cur.execute(
             """
@@ -167,11 +191,11 @@ def check_url(id):
             (id, status_code, h1, title, description)
         )
         conn.commit()
-        flash('Página verificada con éxito', 'success')
+        flash('La página fue verificada correctamente', 'success')
 
     except requests.RequestException:
         conn.rollback()
-        flash('Ocurrió un error al hacer la verificación', 'danger')
+        flash('Ocurrió un error durante la verificación', 'danger')
     finally:
         cur.close()
         conn.close()
