@@ -1,6 +1,7 @@
 import os
 import psycopg2
 import validators
+import requests 
 from urllib.parse import urlparse
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -118,19 +119,40 @@ def show_url(id):
     
     return render_template('show.html', url=url_dict, checks=checks_list)
 
-
+ 
 @app.route('/urls/<int:id>/checks', methods=['POST'])
 def check_url(id):
     conn = get_db_connection()
     cur = conn.cursor()
     
+    # 1. Obtener la URL de la base de datos usando el ID
+    cur.execute("SELECT name FROM urls WHERE id = %s", (id,))
+    url_data = cur.fetchone()
+    
+    if not url_data:
+        cur.close()
+        conn.close()
+        return "Página no encontrada", 404
+
+    url_name = url_data[0]
+
     try:
-        cur.execute("INSERT INTO url_checks (url_id) VALUES (%s)", (id,))
+        # 2. Hacer la solicitud HTTP al sitio web
+        response = requests.get(url_name, timeout=5)
+        status_code = response.status_code
+        
+        # 3. Guardar el resultado en la base de datos
+        cur.execute(
+            "INSERT INTO url_checks (url_id, status_code) VALUES (%s, %s)",
+            (id, status_code)
+        )
         conn.commit()
         flash('La página ha sido revisada con éxito', 'success')
-    except Exception:
+        
+    except requests.RequestException:
+        # Si ocurre cualquier error de red, el sitio no responde, etc.
         conn.rollback()
-        flash('Ocurrió un error al revisar la página', 'danger')
+        flash('Ocurrió un error al hacer la verificación', 'danger')
     finally:
         cur.close()
         conn.close()
