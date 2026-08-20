@@ -12,12 +12,12 @@
         <a href="/" class="btn btn-primary">Analizar otra página</a>
       </div>
       
-      <!-- Atributo data-test="urls" requerido por las pruebas -->
       <table class="table table-bordered table-hover" data-test="urls">
         <thead>
           <tr>
             <th>ID</th>
             <th>Nombre</th>
+            <th>Última revisión</th>
             <th>Fecha de creación</th>
           </tr>
         </thead>
@@ -26,6 +26,7 @@
           <tr>
             <td>{{ url.id }}</td>
             <td><a href="/urls/{{ url.id }}">{{ url.name }}</a></td>
+            <td>{{ url.last_check.date() if url.last_check else '' }}</td>
             <td>{{ url.created_at.date() }}</td>
           </tr>
           {% endfor %}
