@@ -24,24 +24,19 @@ def index():
 
 @app.route('/urls', methods=['POST'])
 def post_url():
-    # 1. Recibir la URL del formulario
     url_input = request.form.get('url', '')
 
-    # 2. Validar formato y longitud
     if not validators.url(url_input) or len(url_input) > 255:
         flash('URL no válida', 'danger')
         return render_template('index.html'), 422
 
-    # 3. Extraer y limpiar el nombre (ej: https://www.ejemplo.com)
     parsed = urlparse(url_input)
     normalized_url = f"{parsed.scheme}://{parsed.netloc}"
 
-    # 4. Guardar en la base de datos
     conn = get_db_connection()
     cur = conn.cursor()
 
     try:
-        # Revisar si la URL ya existía
         cur.execute("SELECT id FROM urls WHERE name = %s", (normalized_url,))
         existing_url = cur.fetchone()
 
@@ -49,7 +44,6 @@ def post_url():
             flash('La página ya existe', 'info')
             url_id = existing_url[0]
         else:
-            # Si es nueva, insertarla
             cur.execute(
                 "INSERT INTO urls (name) VALUES (%s) RETURNING id",
                 (normalized_url,)
@@ -66,32 +60,13 @@ def post_url():
         cur.close()
         conn.close()
 
-    # Redirigir a la página individual de la URL
     return redirect(url_for('show_url', id=url_id))
 
 
-# Ruta temporal para la página individual
-@app.route('/urls', methods=['GET'])
-def get_urls():
-    # Obtener todas las URLs, ordenadas desde la más reciente (DESC)
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id, name, created_at FROM urls ORDER BY id DESC")
-    urls_data = cur.fetchall()
-    cur.close()
-    conn.close()
-
-    # Convertimos las tuplas en diccionarios para que Jinja las lea fácil
-    urls_list = [{'id': row[0], 'name': row[1], 'created_at': row[2]} for row in urls_data]
-    
-    return render_template('urls.html', urls=urls_list)
-
-
 @app.route('/urls', methods=['GET'])
 def get_urls():
     conn = get_db_connection()
     cur = conn.cursor()
-    # Hacemos un JOIN para obtener la fecha de la última revisión (MAX)
     cur.execute("""
         SELECT urls.id, urls.name, urls.created_at, MAX(url_checks.created_at) as last_check
         FROM urls
@@ -115,7 +90,6 @@ def show_url(id):
     conn = get_db_connection()
     cur = conn.cursor()
     
-    # 1. Obtener datos de la URL
     cur.execute("SELECT id, name, created_at FROM urls WHERE id = %s", (id,))
     url_data = cur.fetchone()
     
@@ -126,7 +100,6 @@ def show_url(id):
 
     url_dict = {'id': url_data[0], 'name': url_data[1], 'created_at': url_data[2]}
 
-    # 2. Obtener todas las revisiones (checks) de esta URL
     cur.execute("""
         SELECT id, status_code, h1, title, description, created_at 
         FROM url_checks WHERE url_id = %s ORDER BY id DESC
@@ -152,7 +125,6 @@ def check_url(id):
     cur = conn.cursor()
     
     try:
-        # Por ahora solo guardamos el ID del sitio.
         cur.execute("INSERT INTO url_checks (url_id) VALUES (%s)", (id,))
         conn.commit()
         flash('La página ha sido revisada con éxito', 'success')
