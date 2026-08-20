@@ -1,12 +1,13 @@
 import os
 import re
-import psycopg2
-import validators
-import requests 
-from bs4 import BeautifulSoup
 from urllib.parse import urlparse
+
+import psycopg2
+import requests
+import validators
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, flash, redirect, render_template, request, url_for
 
 # Cargar variables de entorno
 load_dotenv()
@@ -70,7 +71,7 @@ def post_url():
             conn.commit()
             flash('La página se agregó correctamente', 'success')
 
-    except Exception:
+    except psycopg2.Error:
         conn.rollback()
         flash('Ocurrió un error en la base de datos', 'danger')
         return render_template('index.html'), 500

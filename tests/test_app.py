@@ -1,5 +1,5 @@
 import importlib
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 from requests import RequestException
@@ -22,10 +22,10 @@ class FakeCursor:
         elif "SELECT name FROM urls WHERE id = %s" in query_text:
             self.fetchone_result = ("https://example.com",)
         elif "SELECT id, name, created_at FROM urls WHERE id = %s" in query_text:
-            self.fetchone_result = (42, "https://example.com", datetime(2024, 1, 1, 0, 0, 0))
+            self.fetchone_result = (42, "https://example.com", datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc))
         elif "SELECT id, status_code, h1, title, description, created_at" in query_text:
             self.fetchall_result = [
-                (1, 200, "Cabecera principal", "Página de ejemplo", "Descripción de ejemplo", datetime(2024, 1, 1, 0, 0, 0))
+                (1, 200, "Cabecera principal", "Página de ejemplo", "Descripción de ejemplo", datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc))
             ]
         elif "INSERT INTO url_checks" in query_text:
             self.fetchone_result = None
