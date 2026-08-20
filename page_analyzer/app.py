@@ -1,4 +1,5 @@
 import os
+import re
 import psycopg2
 import validators
 import requests 
@@ -17,6 +18,12 @@ app.config['DATABASE_URL'] = os.getenv('DATABASE_URL')
 
 def get_db_connection():
     return psycopg2.connect(app.config['DATABASE_URL'])
+
+
+def get_text_content(node):
+    if node is None:
+        return ''
+    return node.get_text(' ', strip=True) or ''
 
 
 @app.route('/')
@@ -138,24 +145,20 @@ def check_url(id):
 
     try:
         response = requests.get(url_name, timeout=5)
+        response.raise_for_status()
         status_code = response.status_code
-        
-        # Analizar el HTML con BeautifulSoup
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Extraer título
-        title_tag = soup.find('title')
-        title = title_tag.string if title_tag else ''
-        
-        # Extraer h1
-        h1_tag = soup.find('h1')
-        h1 = h1_tag.string if h1_tag else ''
-        
-        # Extraer meta descripción
-        meta_desc = soup.find('meta', attrs={'name': 'description'})
-        description = meta_desc.get('content', '') if meta_desc else ''
 
-        # Guardar todo en la base de datos
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        title = get_text_content(soup.find('title'))
+        h1 = get_text_content(soup.find('h1'))
+
+        meta_desc = soup.find(
+            'meta',
+            attrs={'name': re.compile(r'description', re.IGNORECASE)}
+        )
+        description = meta_desc.get('content', '').strip() if meta_desc else ''
+
         cur.execute(
             """
             INSERT INTO url_checks (url_id, status_code, h1, title, description) 
@@ -164,13 +167,13 @@ def check_url(id):
             (id, status_code, h1, title, description)
         )
         conn.commit()
-        flash('La página ha sido revisada con éxito', 'success')
-        
+        flash('Página verificada con éxito', 'success')
+
     except requests.RequestException:
         conn.rollback()
         flash('Ocurrió un error al hacer la verificación', 'danger')
     finally:
         cur.close()
         conn.close()
-        
+
     return redirect(url_for('show_url', id=id))
