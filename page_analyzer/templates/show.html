@@ -2,11 +2,11 @@
 <html lang="es">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Analizador de Páginas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   </head>
   <body>
+    <!-- Encabezado de mensajes Flash -->
     <header>
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -21,20 +21,24 @@
     </header>
 
     <main class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8 text-center">
-          <h1 class="display-4 mb-4">Analizador de Páginas</h1>
-          <p class="lead mb-4">Verifica la accesibilidad y el SEO de los sitios web de forma gratuita.</p>
-          
-          <form action="/urls" method="post" class="d-flex justify-content-center">
-            <div class="input-group input-group-lg mb-3">
-              <input type="text" name="url" class="form-control" placeholder="https://www.ejemplo.com" required>
-              <button class="btn btn-primary" type="submit">Analizar</button>
-            </div>
-          </form>
-
-        </div>
-      </div>
+      <h1>Sitio web: {{ url.name }}</h1>
+      <!-- Atributo data-test="url" requerido por las pruebas -->
+      <table class="table table-bordered table-hover mt-3" data-test="url">
+        <tbody>
+          <tr>
+            <td>ID</td>
+            <td>{{ url.id }}</td>
+          </tr>
+          <tr>
+            <td>Nombre</td>
+            <td>{{ url.name }}</td>
+          </tr>
+          <tr>
+            <td>Fecha de creación</td>
+            <td>{{ url.created_at.date() }}</td>
+          </tr>
+        </tbody>
+      </table>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
