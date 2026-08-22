@@ -21,8 +21,8 @@
 
     <nav class="navbar navbar-light bg-light mb-4">
       <div class="container">
-        <a class="navbar-brand" href="/">Analizador de páginas</a>
-        <a class="nav-link" href="/urls">Sitios</a>
+        <a class="navbar-brand" href="{{ url_for('index') }}">Analizador de páginas</a>
+        <a class="nav-link" href="{{ url_for('get_urls') }}">Sitios</a>
       </div>
     </nav>
 
@@ -38,7 +38,7 @@
 
       <!-- Botón para ejecutar revisión -->
       <h2 class="mt-5 mb-3">Revisiones</h2>
-      <form method="post" action="/urls/{{ url.id }}/checks" class="mb-3">
+      <form method="post" action="{{ url_for('check_url', id=url.id) }}" class="mb-3">
         <button type="submit" class="btn btn-primary">Iniciar verificación</button>
       </form>
 

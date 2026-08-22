@@ -8,15 +8,15 @@
   <body>
     <nav class="navbar navbar-light bg-light mb-4">
       <div class="container">
-        <a class="navbar-brand" href="/">Analizador de páginas</a>
-        <a class="nav-link" href="/urls">Sitios</a>
+        <a class="navbar-brand" href="{{ url_for('index') }}">Analizador de páginas</a>
+        <a class="nav-link" href="{{ url_for('get_urls') }}">Sitios</a>
       </div>
     </nav>
 
     <main class="container mt-5">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>Sitios web analizados</h1>
-        <a href="/" class="btn btn-primary">Verificar otra página</a>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Verificar otra página</a>
       </div>
       
       <table class="table table-bordered table-hover" data-test="urls">
@@ -32,7 +32,7 @@
           {% for url in urls %}
           <tr>
             <td>{{ url.id }}</td>
-            <td><a href="/urls/{{ url.id }}">{{ url.name }}</a></td>
+            <td><a href="{{ url_for('show_url', id=url.id) }}">{{ url.name }}</a></td>
             <td>{{ url.last_check.date() if url.last_check else '' }}</td>
             <td>{{ url.status_code if url.status_code is not none else '' }}</td>
           </tr>

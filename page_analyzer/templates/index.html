@@ -22,8 +22,8 @@
 
     <nav class="navbar navbar-light bg-light mb-4">
       <div class="container">
-        <a class="navbar-brand" href="/">Analizador de páginas</a>
-        <a class="nav-link" href="/urls">Sitios</a>
+        <a class="navbar-brand" href="{{ url_for('index') }}">Analizador de páginas</a>
+        <a class="nav-link" href="{{ url_for('get_urls') }}">Sitios</a>
       </div>
     </nav>
 
@@ -33,7 +33,7 @@
           <h1 class="display-4 mb-4">Analizador de Páginas</h1>
           <p class="lead mb-4">Verifica la accesibilidad y el SEO de los sitios web de forma gratuita.</p>
           
-          <form action="/urls" method="post" class="d-flex justify-content-center">
+          <form action="{{ url_for('post_url') }}" method="post" class="d-flex justify-content-center">
             <div class="input-group input-group-lg mb-3">
               <input type="text" name="url" class="form-control" placeholder="https://www.example.com" required>
               <button class="btn btn-primary" type="submit">Verificar</button>
